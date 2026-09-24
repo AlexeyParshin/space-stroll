@@ -12,36 +12,36 @@ window.addEventListener('resize', resize);
 // --- Word lists by difficulty ---
 const wordSets = [
   [
-    { ru: 'кот', en: 'cat' }, { ru: 'собака', en: 'dog' },
-    { ru: 'дом', en: 'house' }, { ru: 'дерево', en: 'tree' },
-    { ru: 'вода', en: 'water' }, { ru: 'еда', en: 'food' },
-    { ru: 'машина', en: 'car' }, { ru: 'книга', en: 'book' },
-    { ru: 'солнце', en: 'sun' }, { ru: 'луна', en: 'moon' },
-    { ru: 'звезда', en: 'star' }, { ru: 'ребенок', en: 'child' },
-    { ru: 'игра', en: 'game' }, { ru: 'шар', en: 'ball' },
-    { ru: 'цветок', en: 'flower' }, { ru: 'птица', en: 'bird' },
+    { ru: 'кот', en: 'cat', emoji: '🐱' }, { ru: 'собака', en: 'dog', emoji: '🐶' },
+    { ru: 'дом', en: 'house', emoji: '🏠' }, { ru: 'дерево', en: 'tree', emoji: '🌳' },
+    { ru: 'вода', en: 'water', emoji: '💧' }, { ru: 'еда', en: 'food', emoji: '🍕' },
+    { ru: 'машина', en: 'car', emoji: '🚗' }, { ru: 'книга', en: 'book', emoji: '📖' },
+    { ru: 'солнце', en: 'sun', emoji: '☀️' }, { ru: 'луна', en: 'moon', emoji: '🌙' },
+    { ru: 'звезда', en: 'star', emoji: '⭐' }, { ru: 'ребенок', en: 'child', emoji: '👶' },
+    { ru: 'игра', en: 'game', emoji: '🎮' }, { ru: 'шар', en: 'ball', emoji: '⚽' },
+    { ru: 'цветок', en: 'flower', emoji: '🌸' }, { ru: 'птица', en: 'bird', emoji: '🐦' },
   ],
   [
-    { ru: 'яблоко', en: 'apple' }, { ru: 'стол', en: 'table' },
-    { ru: 'стул', en: 'chair' }, { ru: 'одежда', en: 'clothes' },
-    { ru: 'окно', en: 'window' }, { ru: 'дверь', en: 'door' },
-    { ru: 'город', en: 'city' }, { ru: 'школа', en: 'school' },
-    { ru: 'друг', en: 'friend' }, { ru: 'время', en: 'time' },
-    { ru: 'работа', en: 'work' }, { ru: 'день', en: 'day' },
-    { ru: 'ночь', en: 'night' }, { ru: 'гора', en: 'mountain' },
-    { ru: 'река', en: 'river' }, { ru: 'море', en: 'sea' },
-    { ru: 'земля', en: 'earth' }, { ru: 'небо', en: 'sky' },
+    { ru: 'яблоко', en: 'apple', emoji: '🍎' }, { ru: 'стол', en: 'table', emoji: '🪵' },
+    { ru: 'стул', en: 'chair', emoji: '🪑' }, { ru: 'одежда', en: 'clothes', emoji: '👕' },
+    { ru: 'окно', en: 'window', emoji: '🪟' }, { ru: 'дверь', en: 'door', emoji: '🚪' },
+    { ru: 'город', en: 'city', emoji: '🏙️' }, { ru: 'школа', en: 'school', emoji: '🏫' },
+    { ru: 'друг', en: 'friend', emoji: '🤝' }, { ru: 'время', en: 'time', emoji: '⏰' },
+    { ru: 'работа', en: 'work', emoji: '💼' }, { ru: 'день', en: 'day', emoji: '🌞' },
+    { ru: 'ночь', en: 'night', emoji: '🌜' }, { ru: 'гора', en: 'mountain', emoji: '⛰️' },
+    { ru: 'река', en: 'river', emoji: '🏞️' }, { ru: 'море', en: 'sea', emoji: '🌊' },
+    { ru: 'земля', en: 'earth', emoji: '🌍' }, { ru: 'небо', en: 'sky', emoji: '🌌' },
   ],
   [
-    { ru: 'самолет', en: 'airplane' }, { ru: 'библиотека', en: 'library' },
-    { ru: 'больница', en: 'hospital' }, { ru: 'завод', en: 'factory' },
-    { ru: 'путешествие', en: 'journey' }, { ru: 'собака', en: 'animal' },
-    { ru: 'яйцо', en: 'egg' }, { ru: 'ножницы', en: 'scissors' },
-    { ru: 'телескоп', en: 'telescope' }, { ru: 'музыка', en: 'music' },
-    { ru: 'радуга', en: 'rainbow' }, { ru: 'подарок', en: 'present' },
-    { ru: 'приключение', en: 'adventure' }, { ru: 'знание', en: 'knowledge' },
-    { ru: 'солнечный', en: 'sunny' }, { ru: 'дождливый', en: 'rainy' },
-    { ru: 'красивый', en: 'beautiful' }, { ru: 'быстрый', en: 'fast' },
+    { ru: 'самолет', en: 'airplane', emoji: '✈️' }, { ru: 'библиотека', en: 'library', emoji: '📚' },
+    { ru: 'больница', en: 'hospital', emoji: '🏥' }, { ru: 'завод', en: 'factory', emoji: '🏭' },
+    { ru: 'путешествие', en: 'journey', emoji: '🗺️' }, { ru: 'животное', en: 'animal', emoji: '🐾' },
+    { ru: 'яйцо', en: 'egg', emoji: '🥚' }, { ru: 'ножницы', en: 'scissors', emoji: '✂️' },
+    { ru: 'телескоп', en: 'telescope', emoji: '🔭' }, { ru: 'музыка', en: 'music', emoji: '🎵' },
+    { ru: 'радуга', en: 'rainbow', emoji: '🌈' }, { ru: 'подарок', en: 'present', emoji: '🎁' },
+    { ru: 'приключение', en: 'adventure', emoji: '🗡️' }, { ru: 'знание', en: 'knowledge', emoji: '🧠' },
+    { ru: 'солнечный', en: 'sunny', emoji: '🌤️' }, { ru: 'дождливый', en: 'rainy', emoji: '🌧️' },
+    { ru: 'красивый', en: 'beautiful', emoji: '😍' }, { ru: 'быстрый', en: 'fast', emoji: '💨' },
   ]
 ];
 
@@ -51,20 +51,6 @@ const powerups = [
   { text: '🛡️ Shield (+2 HP)', effect: (g) => { g.lives += 2; updateHealthBar(); } },
   { text: '❤️‍🩹 Health Kit (+3 HP)', effect: (g) => { g.lives = Math.min(g.maxLives, g.lives + 3); updateHealthBar(); showPowerupMsg('❤️‍🩹 +3 HP'); } },
 ];
-
-// Emoji mapping for words
-const emojiMap = {
-  'cat': '🐱', 'dog': '🐶', 'house': '🏠', 'tree': '🌳', 'water': '💧', 'food': '🍕',
-  'car': '🚗', 'book': '📖', 'sun': '☀️', 'moon': '🌙', 'star': '⭐', 'child': '👶',
-  'game': '🎮', 'ball': '⚽', 'flower': '🌸', 'bird': '🐦',
-  'apple': '🍎', 'table': '🪵', 'chair': '🪑', 'clothes': '👕', 'window': '🪟', 'door': '🚪',
-  'city': '🏙️', 'school': '🏫', 'friend': '🤝', 'time': '⏰', 'work': '💼', 'day': '🌞',
-  'night': '🌜', 'mountain': '⛰️', 'river': '🏞️', 'sea': '🌊', 'earth': '🌍', 'sky': '🌌',
-  'airplane': '✈️', 'library': '📚', 'hospital': '🏥', 'factory': '🏭', 'journey': '🗺️',
-  'animal': '🐾', 'egg': '🥚', 'scissors': '✂️', 'telescope': '🔭', 'music': '🎵',
-  'rainbow': '🌈', 'present': '🎁', 'adventure': '🗡️', 'knowledge': '🧠',
-  'sunny': '🌤️', 'rainy': '🌧️', 'beautiful': '😍', 'fast': '💨',
-};
 
 // --- Camera / world system ---
 let camera = { x: 0, y: 0 };
@@ -715,7 +701,7 @@ function initLevel(level) {
     if (tooClose) { i--; continue; }
 
     let wordPair = shuffled[i % shuffled.length];
-    let emoji = emojiMap[wordPair.en] || '🪨';
+    let emoji = wordPair.emoji || '🪨';
     game.meteors.push(new Meteor(wordPair.en, wx, wy, emoji, false));
   }
 
