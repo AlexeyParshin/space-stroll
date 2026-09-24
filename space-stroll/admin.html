@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Space Stroll - Admin</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0a0a1a;
+    font-family: 'Press Start 2P', monospace;
+    color: #9ab0d0;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  .hidden { display: none !important; }
+
+  h1 { font-size: 24px; color: #e8d5b7; margin-bottom: 30px; text-align: center; }
+  h2 { font-size: 14px; color: #5ac8fa; margin-bottom: 15px; margin-top: 20px; }
+
+  /* Login */
+  #loginScreen {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 100vh; gap: 20px;
+  }
+
+  #loginScreen input {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 16px; padding: 12px 20px;
+    background: #1a1a3e; border: 2px solid #3a4a6a; color: #fff;
+    text-align: center; outline: none;
+  }
+
+  #loginScreen input:focus { border-color: #5ac8fa; }
+
+  /* Buttons */
+  .btn {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px; padding: 10px 24px;
+    border: 2px solid #3a4a6a; border-radius: 8px;
+    cursor: pointer; transition: all 0.2s;
+    background: rgba(30,40,80,0.6); color: #c8d8ff;
+  }
+  .btn:hover {
+    background: rgba(50,70,120,0.8);
+    border-color: #8ab0ff;
+  }
+  .btn-primary { border-color: #5ac8fa; color: #5ac8fa; }
+  .btn-danger { border-color: #ff6b8a; color: #ff6b8a; }
+  .btn-success { border-color: #44ff88; color: #44ff88; }
+
+  /* Admin layout */
+  #adminScreen { max-width: 1200px; margin: 0 auto; }
+
+  .top-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #3a4a6a;
+  }
+
+  .tabs { display: flex; gap: 8px; margin-bottom: 25px; }
+  .tab-btn { font-size: 11px; padding: 10px 18px; }
+  .tab-btn.active { background: rgba(90,200,250,0.15); border-color: #5ac8fa; color: #5ac8fa; }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Word cards */
+  .level-section { margin-bottom: 30px; }
+  .level-header {
+    font-size: 12px; color: #f0c040; margin-bottom: 10px;
+    padding: 8px 12px; background: rgba(240,192,64,0.1); border-radius: 6px;
+  }
+
+  .word-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+
+  .word-card {
+    background: rgba(20,30,60,0.8); border: 1px solid #3a4a6a; border-radius: 8px;
+    padding: 12px; display: flex; align-items: center; gap: 10px;
+  }
+
+  .word-card .emoji { font-size: 28px; width: 40px; text-align: center; }
+  .word-card .text { flex: 1; font-size: 11px; line-height: 1.6; }
+  .word-card .text .ru { color: #e8d5b7; }
+  .word-card .text .en { color: #5ac8fa; }
+
+  /* Forms */
+  .form-row { display: flex; gap: 10px; margin-bottom: 15px; align-items: end; flex-wrap: wrap; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group label { font-size: 9px; color: #7a8aaa; text-transform: uppercase; }
+
+  .form-group input, .form-group select {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px; padding: 8px 12px;
+    background: #1a1a3e; border: 2px solid #3a4a6a; color: #fff; outline: none; width: 180px;
+  }
+  .form-group input:focus, .form-group select:focus { border-color: #5ac8fa; }
+
+  /* Import/Export */
+  .io-section { margin-bottom: 30px; padding: 20px; background: rgba(20,30,60,0.5); border-radius: 10px; border: 1px solid #3a4a6a; }
+
+  textarea {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px; width: 100%; min-height: 200px; padding: 12px;
+    background: #0a0a1a; border: 2px solid #3a4a6a; color: #9ab0d0;
+    resize: vertical; outline: none; margin-bottom: 10px;
+  }
+  textarea:focus { border-color: #5ac8fa; }
+
+  .io-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+  .file-input-label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px; padding: 10px 24px;
+    border: 2px solid #5ac8fa; color: #5ac8fa;
+    cursor: pointer; border-radius: 8px; transition: all 0.2s;
+    background: rgba(90,200,250,0.1);
+  }
+  .file-input-label:hover { background: rgba(90,200,250,0.2); }
+  .file-input-label input { display: none; }
+
+  .status-msg { font-size: 10px; margin-top: 8px; padding: 6px 10px; border-radius: 4px; }
+  .status-ok { color: #44ff88; }
+  .status-err { color: #ff6b8a; }
+
+  /* Emoji picker */
+  .emoji-picker {
+    display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; max-height: 120px; overflow-y: auto;
+    padding: 8px; background: #0a0a1a; border-radius: 6px; border: 1px solid #3a4a6a;
+  }
+  .emoji-picker span {
+    font-size: 20px; cursor: pointer; padding: 4px; border-radius: 4px; transition: background 0.15s;
+  }
+  .emoji-picker span:hover { background: rgba(90,200,250,0.2); }
+
+  /* Back to game link */
+  .back-link {
+    font-size: 10px; color: #7a8aaa; text-decoration: none;
+    border: 1px solid #3a4a6a; padding: 8px 16px; border-radius: 6px;
+  }
+  .back-link:hover { color: #5ac8fa; border-color: #5ac8fa; }
+
+  /* Search */
+  .search-bar { margin-bottom: 15px; }
+  .search-bar input {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px; padding: 8px 14px;
+    background: #1a1a3e; border: 2px solid #3a4a6a; color: #fff; outline: none; width: 300px;
+  }
+  .search-bar input:focus { border-color: #5ac8fa; }
+
+  .word-count { font-size: 9px; color: #7a8aaa; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+
+<!-- Login Screen -->
+<div id="loginScreen">
+  <div style="font-size:24px;color:#e8d5b7;margin-bottom:10px;">SPACE STROLL</div>
+  <div style="font-size:10px;color:#7a8aaa;margin-bottom:30px;">Admin Panel</div>
+  <input type="password" id="passwordInput" placeholder="Enter password" autofocus>
+  <button class="btn btn-primary" onclick="checkLogin()">LOGIN</button>
+  <div id="loginError" style="font-size:10px;color:#ff6b8a;" class="hidden">Wrong password!</div>
+</div>
+
+<!-- Admin Screen -->
+<div id="adminScreen" class="hidden">
+  <div class="top-bar">
+    <h1>ADMIN PANEL</h1>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <a href="index.html" class="back-link">← Back to Game</a>
+      <button class="btn btn-danger" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('words')">Words</button>
+    <button class="tab-btn" onclick="switchTab('emojis')">Emoji Map</button>
+    <button class="tab-btn" onclick="switchTab('export')">Export / Import</button>
+  </div>
+
+  <!-- Words Tab -->
+  <div id="tab-words" class="tab-content active">
+    <h2>ADD WORD</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Russian (ru)</label>
+        <input type="text" id="newWordRu" placeholder="кот">
+      </div>
+      <div class="form-group">
+        <label>English (en)</label>
+        <input type="text" id="newWordEn" placeholder="cat">
+      </div>
+      <div class="form-group">
+        <label>Emoji</label>
+        <input type="text" id="newWordEmoji" placeholder="🐱" style="width:80px;">
+      </div>
+      <div class="form-group">
+        <label>Level</label>
+        <select id="newWordLevel">
+          <option value="0">Level 1 (Easy)</option>
+          <option value="1">Level 2 (Medium)</option>
+          <option value="2">Level 3 (Hard)</option>
+        </select>
+      </div>
+      <button class="btn btn-success" onclick="addWord()">+ Add</button>
+    </div>
+
+    <h2>WORDS BY LEVEL</h2>
+    <div class="search-bar">
+      <input type="text" id="wordSearch" placeholder="Search words..." oninput="renderWords()">
+    </div>
+    <div id="wordsContainer"></div>
+  </div>
+
+  <!-- Emoji Map Tab -->
+  <div id="tab-emojis" class="tab-content">
+    <h2>EMOJI MAP</h2>
+    <p style="font-size:10px;color:#7a8aaa;margin-bottom:15px;">Click an emoji to assign it to the selected word below.</p>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Select Word</label>
+        <select id="emojiWordSelect" onchange="renderEmojiEditor()"></select>
+      </div>
+      <div class="form-group">
+        <label>Current Emoji</label>
+        <input type="text" id="emojiDisplay" readonly style="font-size:24px;width:80px;text-align:center;">
+      </div>
+    </div>
+
+    <div class="emoji-picker" id="emojiPicker"></div>
+
+    <div style="margin-top:15px;display:flex;gap:10px;">
+      <button class="btn btn-success" onclick="updateEmoji()">Update Emoji</button>
+      <button class="btn btn-danger" onclick="removeEmoji()">Remove Emoji</button>
+    </div>
+
+    <h2 style="margin-top:30px;">ALL EMOJI ENTRIES</h2>
+    <div id="emojiList"></div>
+  </div>
+
+  <!-- Export/Import Tab -->
+  <div id="tab-export" class="tab-content">
+    <div class="io-section">
+      <h2>EXPORT WORDS</h2>
+      <p style="font-size:10px;color:#7a8aaa;margin-bottom:10px;">Download all word sets as JSON.</p>
+      <textarea id="exportWords" readonly></textarea>
+      <div class="io-actions">
+        <button class="btn btn-primary" onclick="generateExportWords()">Generate</button>
+        <button class="btn btn-success" onclick="downloadFile('words.json', 'application/json', document.getElementById('exportWords').value)">Download JSON</button>
+      </div>
+    </div>
+
+    <div class="io-section">
+      <h2>IMPORT WORDS</h2>
+      <p style="font-size:10px;color:#7a8aaa;margin-bottom:10px;">Replace all word sets with imported JSON data.</p>
+      <textarea id="importWords" placeholder='[{"ru":"кот","en":"cat"},...]'></textarea>
+      <div class="io-actions">
+        <label class="file-input-label">
+          Choose File
+          <input type="file" accept=".json" onchange="loadFile(event, 'importWords')">
+        </label>
+        <button class="btn btn-danger" onclick="importWords()">Import (Replace All)</button>
+      </div>
+      <div id="wordsImportStatus"></div>
+    </div>
+
+    <div class="io-section">
+      <h2>EXPORT EMOJI MAP</h2>
+      <p style="font-size:10px;color:#7a8aaa;margin-bottom:10px;">Download emoji-to-word mapping as JSON.</p>
+      <textarea id="exportEmojis" readonly></textarea>
+      <div class="io-actions">
+        <button class="btn btn-primary" onclick="generateExportEmojis()">Generate</button>
+        <button class="btn btn-success" onclick="downloadFile('emoji-map.json', 'application/json', document.getElementById('exportEmojis').value)">Download JSON</button>
+      </div>
+    </div>
+
+    <div class="io-section">
+      <h2>IMPORT EMOJI MAP</h2>
+      <p style="font-size:10px;color:#7a8aaa;margin-bottom:10px;">Replace emoji map with imported JSON (format: {"cat":"🐱","dog":"🐶",...}).</p>
+      <textarea id="importEmojis" placeholder='{"cat":"🐱","dog":"🐶"}'></textarea>
+      <div class="io-actions">
+        <label class="file-input-label">
+          Choose File
+          <input type="file" accept=".json" onchange="loadFile(event, 'importEmojis')">
+        </label>
+        <button class="btn btn-danger" onclick="importEmojis()">Import (Replace All)</button>
+      </div>
+      <div id="emojisImportStatus"></div>
+    </div>
+
+    <div class="io-section" style="border-color:#f0c040;">
+      <h2 style="color:#f0c040;">GENERATE UPDATED SCRIPT.JS</h2>
+      <p style="font-size:10px;color:#7a8aaa;margin-bottom:10px;">Download a complete updated script.js with your changes applied.</p>
+      <div class="io-actions">
+        <button class="btn btn-success" onclick="generateScript()">Generate & Download script.js</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== DATA =====
+let wordSets = [
+  [
+    { ru: 'кот', en: 'cat' }, { ru: 'собака', en: 'dog' },
+    { ru: 'дом', en: 'house' }, { ru: 'дерево', en: 'tree' },
+    { ru: 'вода', en: 'water' }, { ru: 'еда', en: 'food' },
+    { ru: 'машина', en: 'car' }, { ru: 'книга', en: 'book' },
+    { ru: 'солнце', en: 'sun' }, { ru: 'луна', en: 'moon' },
+    { ru: 'звезда', en: 'star' }, { ru: 'ребенок', en: 'child' },
+    { ru: 'игра', en: 'game' }, { ru: 'шар', en: 'ball' },
+    { ru: 'цветок', en: 'flower' }, { ru: 'птица', en: 'bird' },
+  ],
+  [
+    { ru: 'яблоко', en: 'apple' }, { ru: 'стол', en: 'table' },
+    { ru: 'стул', en: 'chair' }, { ru: 'одежда', en: 'clothes' },
+    { ru: 'окно', en: 'window' }, { ru: 'дверь', en: 'door' },
+    { ru: 'город', en: 'city' }, { ru: 'школа', en: 'school' },
+    { ru: 'друг', en: 'friend' }, { ru: 'время', en: 'time' },
+    { ru: 'работа', en: 'work' }, { ru: 'день', en: 'day' },
+    { ru: 'ночь', en: 'night' }, { ru: 'гора', en: 'mountain' },
+    { ru: 'река', en: 'river' }, { ru: 'море', en: 'sea' },
+    { ru: 'земля', en: 'earth' }, { ru: 'небо', en: 'sky' },
+  ],
+  [
+    { ru: 'самолет', en: 'airplane' }, { ru: 'библиотека', en: 'library' },
+    { ru: 'больница', en: 'hospital' }, { ru: 'завод', en: 'factory' },
+    { ru: 'путешествие', en: 'journey' }, { ru: 'собака', en: 'animal' },
+    { ru: 'яйцо', en: 'egg' }, { ru: 'ножницы', en: 'scissors' },
+    { ru: 'телескоп', en: 'telescope' }, { ru: 'музыка', en: 'music' },
+    { ru: 'радуга', en: 'rainbow' }, { ru: 'подарок', en: 'present' },
+    { ru: 'приключение', en: 'adventure' }, { ru: 'знание', en: 'knowledge' },
+    { ru: 'солнечный', en: 'sunny' }, { ru: 'дождливый', en: 'rainy' },
+    { ru: 'красивый', en: 'beautiful' }, { ru: 'быстрый', en: 'fast' },
+  ]
+];
+
+let emojiMap = {
+  'cat': '🐱', 'dog': '🐶', 'house': '🏠', 'tree': '🌳', 'water': '💧', 'food': '🍕',
+  'car': '🚗', 'book': '📖', 'sun': '☀️', 'moon': '🌙', 'star': '⭐', 'child': '👶',
+  'game': '🎮', 'ball': '⚽', 'flower': '🌸', 'bird': '🐦',
+  'apple': '🍎', 'table': '🪵', 'chair': '🪑', 'clothes': '👕', 'window': '🪟', 'door': '🚪',
+  'city': '🏙️', 'school': '🏫', 'friend': '🤝', 'time': '⏰', 'work': '💼', 'day': '🌞',
+  'night': '🌜', 'mountain': '⛰️', 'river': '🏞️', 'sea': '🌊', 'earth': '🌍', 'sky': '🌌',
+  'airplane': '✈️', 'library': '📚', 'hospital': '🏥', 'factory': '🏭', 'journey': '🗺️',
+  'animal': '🐾', 'egg': '🥚', 'scissors': '✂️', 'telescope': '🔭', 'music': '🎵',
+  'rainbow': '🌈', 'present': '🎁', 'adventure': '🗡️', 'knowledge': '🧠',
+  'sunny': '🌤️', 'rainy': '🌧️', 'beautiful': '😍', 'fast': '💨',
+};
+
+const LEVEL_NAMES = ['Level 1 (Easy)', 'Level 2 (Medium)', 'Level 3 (Hard)'];
+const COMMON_EMOJIS = [
+  '😀','😃','😄','😁','😆','😅','🤣','😂','🙂','😊',
+  '😇','🥰','😍','🤩','😘','😋','😛','😜','🤪','😝',
+  '🐱','🐶','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯',
+  '🦁','🐮','🐷','🐸','🐵','🐔','🐧','🐦','🦆','🦅',
+  '🐙','🦑','🐬','🐳','🦈','🐊','🐘','🦒','🐴','🐖',
+  '🌳','🌲','🌴','🌵','🌾','🌿','☘️','🍀','🍃','🍂',
+  '🍄','🌸','💐','🌷','🌹','🌺','🌻','🌼','🌞','🌝',
+  '🌙','⭐','🌟','💫','✨','⚡','☀️','🔥','💧','🌊',
+  '🏠','🏡','🏢','🏗️','🏭','🏰','🗼','🗽','⛪','🕌',
+  '🚗','🚌','🚕','✈️','🚀','🚂','⛵','🛸','🚁','🏎️',
+  '📖','📚','📝','💼','📁','🗂️','📌','🔭','🎮','🎯',
+  '⚽','🏀','🏈','⚾','🎾','🏐','🎱','🏓','🏸','🥊',
+  '🍕','🍔','🍟','🌭','🍿','🧁','🍰','🍩','🍪','🍫',
+  '🍎','🍏','🍐','🍊','🍋','🍌','🍉','🍇','🍓','🥝',
+  '❤️','🧡','💛','💚','💙','💜','🖤','🤍','💔','❣️',
+  '💯','💢','💥','💫','💦','💨','🕳️','💣','💊','🚬',
+  '👶','🧒','👦','👧','🧑','👨','👩','🧔','👴','👵',
+];
+
+// ===== AUTH =====
+function checkLogin() {
+  const pw = document.getElementById('passwordInput').value;
+  if (pw === 'asd123') {
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('adminScreen').classList.remove('hidden');
+    renderWords();
+    renderEmojiEditor();
+    generateExportWords();
+    generateExportEmojis();
+  } else {
+    document.getElementById('loginError').classList.remove('hidden');
+  }
+}
+
+document.getElementById('passwordInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') checkLogin();
+});
+
+function logout() {
+  document.getElementById('adminScreen').classList.add('hidden');
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('passwordInput').value = '';
+}
+
+// ===== TABS =====
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', ['words','emojis','export'][i] === name);
+  });
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+// ===== WORDS =====
+function addWord() {
+  const ru = document.getElementById('newWordRu').value.trim();
+  const en = document.getElementById('newWordEn').value.trim().toLowerCase();
+  const emoji = document.getElementById('newWordEmoji').value.trim();
+  const level = parseInt(document.getElementById('newWordLevel').value);
+
+  if (!ru || !en) return alert('Enter both Russian and English words!');
+
+  wordSets[level].push({ ru, en });
+  if (emoji) emojiMap[en] = emoji;
+
+  document.getElementById('newWordRu').value = '';
+  document.getElementById('newWordEn').value = '';
+  document.getElementById('newWordEmoji').value = '';
+
+  renderWords();
+}
+
+function removeWord(level, index) {
+  const word = wordSets[level][index];
+  delete emojiMap[word.en];
+  wordSets[level].splice(index, 1);
+  renderWords();
+  renderEmojiEditor();
+}
+
+function renderWords() {
+  const search = (document.getElementById('wordSearch').value || '').toLowerCase();
+  let html = '';
+
+  for (let level = 0; level < 3; level++) {
+    let words = wordSets[level];
+    if (search) {
+      words = words.filter(w => w.ru.toLowerCase().includes(search) || w.en.toLowerCase().includes(search));
+    }
+
+    html += `<div class="level-section">
+      <div class="level-header">${LEVEL_NAMES[level]} — ${wordSets[level].length} words</div>
+      <div class="word-grid">`;
+
+    for (let i = 0; i < wordSets[level].length; i++) {
+      const w = wordSets[level][i];
+      if (search && !w.ru.toLowerCase().includes(search) && !w.en.toLowerCase().includes(search)) continue;
+      const emoji = emojiMap[w.en] || '❓';
+      html += `<div class="word-card">
+        <div class="emoji">${emoji}</div>
+        <div class="text">
+          <div class="ru">${w.ru}</div>
+          <div class="en">${w.en}</div>
+        </div>
+        <button class="btn btn-danger" style="font-size:9px;padding:6px 10px;" onclick="removeWord(${level}, ${i})">✕</button>
+      </div>`;
+    }
+
+    html += '</div></div>';
+  }
+
+  document.getElementById('wordsContainer').innerHTML = html;
+}
+
+// ===== EMOJI EDITOR =====
+function getAllWords() {
+  let words = [];
+  for (let l = 0; l < 3; l++) {
+    for (let w of wordSets[l]) {
+      words.push({ ...w, level: l });
+    }
+  }
+  return words;
+}
+
+function renderEmojiEditor() {
+  const words = getAllWords();
+  const sel = document.getElementById('emojiWordSelect');
+  sel.innerHTML = '';
+  for (let w of words) {
+    const opt = document.createElement('option');
+    opt.value = w.en;
+    opt.textContent = `${w.ru} (${w.en}) — L${w.level + 1}`;
+    sel.appendChild(opt);
+  }
+
+  if (words.length > 0 && !sel.value) sel.value = words[0].en;
+  updateEmojiDisplay();
+  sel.onchange = updateEmojiDisplay;
+
+  // Emoji picker
+  const picker = document.getElementById('emojiPicker');
+  picker.innerHTML = '';
+  for (let e of COMMON_EMOJIS) {
+    const span = document.createElement('span');
+    span.textContent = e;
+    span.onclick = () => {
+      document.getElementById('newWordEmoji').value = e;
+      updateEmojiDisplay();
+    };
+    picker.appendChild(span);
+  }
+
+  renderEmojiList();
+}
+
+function updateEmojiDisplay() {
+  const en = document.getElementById('emojiWordSelect').value;
+  const display = document.getElementById('emojiDisplay');
+  display.value = emojiMap[en] || '';
+}
+
+function updateEmoji() {
+  const en = document.getElementById('emojiWordSelect').value;
+  const emoji = document.getElementById('newWordEmoji').value.trim();
+  if (!emoji) return alert('Select or type an emoji first!');
+  emojiMap[en] = emoji;
+  updateEmojiDisplay();
+  renderWords();
+  renderEmojiList();
+}
+
+function removeEmoji() {
+  const en = document.getElementById('emojiWordSelect').value;
+  delete emojiMap[en];
+  updateEmojiDisplay();
+  renderWords();
+  renderEmojiList();
+}
+
+function renderEmojiList() {
+  let html = '';
+  const words = getAllWords();
+  for (let w of words) {
+    const e = emojiMap[w.en] || '❓';
+    html += `<div class="word-card">
+      <div class="emoji">${e}</div>
+      <div class="text">
+        <div class="ru">${w.ru}</div>
+        <div class="en">${w.en}</div>
+      </div>
+    </div>`;
+  }
+  document.getElementById('emojiList').innerHTML = html;
+}
+
+// ===== EXPORT / IMPORT =====
+function generateExportWords() {
+  const data = { level1: wordSets[0], level2: wordSets[1], level3: wordSets[2] };
+  document.getElementById('exportWords').value = JSON.stringify(data, null, 2);
+}
+
+function downloadFile(filename, type, content) {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function loadFile(event, targetId) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => { document.getElementById(targetId).value = e.target.result; };
+  reader.readAsText(file);
+}
+
+function importWords() {
+  const status = document.getElementById('wordsImportStatus');
+  try {
+    const data = JSON.parse(document.getElementById('importWords').value);
+    if (!data.level1 || !data.level2 || !data.level3) throw new Error('Missing levels');
+    wordSets[0] = data.level1;
+    wordSets[1] = data.level2;
+    wordSets[2] = data.level3;
+    status.innerHTML = '<div class="status-msg status-ok">Words imported successfully!</div>';
+    renderWords();
+    renderEmojiEditor();
+    generateExportWords();
+  } catch (e) {
+    status.innerHTML = `<div class="status-msg status-err">Error: ${e.message}</div>`;
+  }
+}
+
+function generateExportEmojis() {
+  document.getElementById('exportEmojis').value = JSON.stringify(emojiMap, null, 2);
+}
+
+function importEmojis() {
+  const status = document.getElementById('emojisImportStatus');
+  try {
+    const data = JSON.parse(document.getElementById('importEmojis').value);
+    if (typeof data !== 'object') throw new Error('Invalid format');
+    emojiMap = data;
+    status.innerHTML = '<div class="status-msg status-ok">Emoji map imported successfully!</div>';
+    renderWords();
+    renderEmojiEditor();
+    generateExportEmojis();
+  } catch (e) {
+    status.innerHTML = `<div class="status-msg status-err">Error: ${e.message}</div>`;
+  }
+}
+
+// ===== GENERATE SCRIPT.JS =====
+function generateScript() {
+  const wordSetsStr = JSON.stringify(wordSets, null, 2);
+  const emojiMapStr = JSON.stringify(emojiMap, null, 2);
+
+  // Read the original script.js content and replace data sections
+  fetch('script.js')
+    .then(r => r.text())
+    .then(original => {
+      let updated = original;
+
+      // Replace wordSets
+      const wordSetsMatch = original.match(/const wordSets = \[[\s\S]*?\];/);
+      if (wordSetsMatch) {
+        updated = updated.replace(wordSetsMatch[0], `const wordSets = ${wordSetsStr};`);
+      }
+
+      // Replace emojiMap
+      const emojiMatch = original.match(/const emojiMap = \{[\s\S]*?\};/);
+      if (emojiMatch) {
+        updated = updated.replace(emojiMatch[0], `const emojiMap = ${emojiMapStr};`);
+      }
+
+      downloadFile('script.js', 'application/javascript', updated);
+    })
+    .catch(() => {
+      // Fallback: just tell user to manually update
+      alert('Could not fetch script.js. Please copy the data below and replace in script.js:\n\n' +
+        'wordSets:\n' + wordSetsStr + '\n\nemojiMap:\n' + emojiMapStr);
+    });
+}
+</script>
+</body>
+</html>
