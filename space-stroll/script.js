@@ -1207,9 +1207,9 @@ function gameLoop() {
       let angle = Math.atan2(sp.y - H/2, sp.x - W/2);
 
       ctx.save();
-      ctx.globalAlpha = 0.4;
+      ctx.globalAlpha = 0.8;
       ctx.strokeStyle = '#5ac8fa';
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 4;
       ctx.lineCap = 'round';
 
       // Arc spans ~180 degrees for rough direction indication, drawn at vision radius
@@ -1217,16 +1217,6 @@ function gameLoop() {
       ctx.beginPath();
       ctx.arc(W/2, H/2, game.visionRadius, angle - arcSpan/2, angle + arcSpan/2);
       ctx.stroke();
-
-      // Small dot at arc center for orientation
-      ctx.fillStyle = '#5ac8fa';
-      ctx.beginPath();
-      ctx.arc(
-        W/2 + Math.cos(angle) * game.visionRadius,
-        H/2 + Math.sin(angle) * game.visionRadius,
-        3, 0, Math.PI * 2
-      );
-      ctx.fill();
 
       ctx.restore();
     }
