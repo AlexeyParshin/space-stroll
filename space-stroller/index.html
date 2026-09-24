@@ -934,7 +934,7 @@ function shuffleArray(arr) {
 
 function pickNextTarget() {
   if (!game) return;
-  let uncaught = game.meteors.filter(m => !m.caught);
+  let uncaught = game.meteors.filter(m => !m.caught && !m.isObstacle);
   if (uncaught.length === 0) return;
   let targetMeteor = uncaught[Math.floor(Math.random() * uncaught.length)];
   game.correctNext = targetMeteor.text;
