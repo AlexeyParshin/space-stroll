@@ -18,7 +18,7 @@
 
   canvas { display: block; }
 
-  #startScreen, #victoryScreen {
+  #startScreen, #victoryScreen, #gameOverScreen {
     position: fixed; inset: 0;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     z-index: 10; background: radial-gradient(ellipse at center, #1a1a3e 0%, #0a0a1a 70%);
@@ -144,9 +144,9 @@
 </div>
 
 <div id="gameOverScreen" class="hidden">
-  <div class="title" style="color:#ff6b8a;">Game Over</div>
-  <div class="subtitle">Your ship was destroyed!</div>
-  <div style="font-size:32px;color:#7a8aaa;margin-bottom:10px;">Score: <span id="finalScore">0</span></div>
+  <div style="font-size:72px;color:#ff6b8a;text-shadow:0 0 40px rgba(255,107,138,0.5);margin-bottom:16px;letter-spacing:4px;">GAME OVER</div>
+  <div style="font-size:28px;color:#7a8aaa;margin-bottom:8px;">Your ship was destroyed!</div>
+  <div style="font-size:36px;color:#e8d5b7;margin-bottom:40px;text-shadow:0 0 15px rgba(232,213,183,0.3);">Score: <span id="finalScore">0</span></div>
   <button class="btn" onclick="goToMenu()">Try Again</button>
 </div>
 
@@ -221,6 +221,20 @@ const powerups = [
   { text: '🛡️ Shield (+2 HP)', effect: (g) => { g.lives += 2; updateHealthBar(); } },
 ];
 
+// Emoji mapping for words
+const emojiMap = {
+  'cat': '🐱', 'dog': '🐶', 'house': '🏠', 'tree': '🌳', 'water': '💧', 'food': '🍕',
+  'car': '🚗', 'book': '📖', 'sun': '☀️', 'moon': '🌙', 'star': '⭐', 'child': '👶',
+  'game': '🎮', 'ball': '⚽', 'flower': '🌸', 'bird': '🐦',
+  'apple': '🍎', 'table': '🪵', 'chair': '🪑', 'clothes': '👕', 'window': '🪟', 'door': '🚪',
+  'city': '🏙️', 'school': '🏫', 'friend': '🤝', 'time': '⏰', 'work': '💼', 'day': '🌞',
+  'night': '🌜', 'mountain': '⛰️', 'river': '🏞️', 'sea': '🌊', 'earth': '🌍', 'sky': '🌌',
+  'airplane': '✈️', 'library': '📚', 'hospital': '🏥', 'factory': '🏭', 'journey': '🗺️',
+  'animal': '🐾', 'egg': '🥚', 'scissors': '✂️', 'telescope': '🔭', 'music': '🎵',
+  'rainbow': '🌈', 'present': '🎁', 'adventure': '🗡️', 'knowledge': '🧠',
+  'sunny': '🌤️', 'rainy': '🌧️', 'beautiful': '😍', 'fast': '💨',
+};
+
 // --- Camera / world system ---
 let camera = { x: 0, y: 0 };
 const shipWorld = { x: 0, y: 0 };
@@ -293,10 +307,11 @@ function sketchText(text, x, y, size, color, align) {
 
 // --- Meteor word class ---
 class Meteor {
-  constructor(text, wx, wy) {
+  constructor(text, wx, wy, emoji) {
     this.text = text;
     this.wx = wx;
     this.wy = wy;
+    this.emoji = emoji;
     this.radius = 40 + text.length * 5;
     this.rotation = Math.random() * Math.PI * 2;
     this.rotSpeed = (Math.random() - 0.5) * 0.005;
@@ -396,10 +411,16 @@ class Meteor {
 
     ctx.restore();
 
-    // Word label (not rotated)
-    if (!this.caught) {
-      let wordSize = Math.max(18, Math.min(26, 300 / this.text.length));
-      sketchText(this.text, sp.x, sp.y + r + 20, wordSize, '#d8c8a8');
+    // Emoji inside meteor (not rotated, not caught)
+    if (!this.caught && this.emoji) {
+      let emojiSize = Math.max(24, Math.min(36, this.radius * 0.7));
+      ctx.save();
+      ctx.globalAlpha = this.opacity;
+      ctx.font = `${emojiSize}px serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(this.emoji, sp.x, sp.y);
+      ctx.restore();
     }
   }
 
@@ -848,7 +869,8 @@ function initLevel(level) {
     if (tooClose) { i--; continue; }
 
     let wordPair = shuffled[i % shuffled.length];
-    game.meteors.push(new Meteor(wordPair.en, wx, wy));
+    let emoji = emojiMap[wordPair.en] || '🪨';
+    game.meteors.push(new Meteor(wordPair.en, wx, wy, emoji));
   }
 
   // Pick first target
