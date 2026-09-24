@@ -63,6 +63,52 @@ function worldToScreen(wx, wy) {
 
 // --- Input ---
 let keys = {};
+
+// Mouse/touch control state
+let mouseDown = false;
+let mouseStartX = 0, mouseStartY = 0;
+let mouseX = 0, mouseY = 0;
+
+window.addEventListener('mousedown', e => {
+  if (!game || game.transitioning) return;
+  mouseDown = true;
+  mouseStartX = e.clientX;
+  mouseStartY = e.clientY;
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+});
+
+window.addEventListener('mousemove', e => {
+  if (!mouseDown) return;
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+});
+
+window.addEventListener('mouseup', () => {
+  mouseDown = false;
+});
+
+window.addEventListener('touchstart', e => {
+  if (!game || game.transitioning) return;
+  const t = e.touches[0];
+  mouseDown = true;
+  mouseStartX = t.clientX;
+  mouseStartY = t.clientY;
+  mouseX = t.clientX;
+  mouseY = t.clientY;
+}, { passive: true });
+
+window.addEventListener('touchmove', e => {
+  if (!mouseDown) return;
+  const t = e.touches[0];
+  mouseX = t.clientX;
+  mouseY = t.clientY;
+}, { passive: true });
+
+window.addEventListener('touchend', () => {
+  mouseDown = false;
+});
+
 window.addEventListener('keydown', e => {
   keys[e.key] = true;
   if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(e.key)) e.preventDefault();
@@ -946,6 +992,26 @@ function gameLoop() {
     }
   }
 
+  // Mouse/touch drag acceleration + rotation toward drag direction
+  if (mouseDown) {
+    let dx = mouseX - mouseStartX;
+    let dy = mouseY - mouseStartY;
+    let dragDist = Math.sqrt(dx * dx + dy * dy);
+    if (dragDist > 5) {
+      let pullAngle = Math.atan2(dy, dx);
+      // Rotate ship toward drag direction (smoothly)
+      let targetAngle = pullAngle;
+      let angleDiff = targetAngle - game.angle;
+      while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+      while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+      game.angle += angleDiff * 0.15;
+
+      let accelStrength = Math.min(dragDist / 100, 1) * game.acceleration * 1.5;
+      game.vx += Math.cos(pullAngle) * accelStrength;
+      game.vy += Math.sin(pullAngle) * accelStrength;
+    }
+  }
+
   // Friction
   game.vx *= game.friction;
   game.vy *= game.friction;
@@ -1137,22 +1203,31 @@ function gameLoop() {
 
     if (nearest && !isInVision(nearest.wx, nearest.wy)) {
       let sp = worldToScreen(nearest.wx, nearest.wy);
-      // Draw arrow pointing toward it from screen edge
+      // Draw arc pointing toward it at the edge of vision
       let angle = Math.atan2(sp.y - H/2, sp.x - W/2);
-      let edgeX = W/2 + Math.cos(angle) * (game.visionRadius - 30);
-      let edgeY = H/2 + Math.sin(angle) * (game.visionRadius - 30);
 
       ctx.save();
       ctx.globalAlpha = 0.4;
-      ctx.translate(edgeX, edgeY);
-      ctx.rotate(angle);
+      ctx.strokeStyle = '#5ac8fa';
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+
+      // Arc spans ~180 degrees for rough direction indication, drawn at vision radius
+      let arcSpan = Math.PI;
+      ctx.beginPath();
+      ctx.arc(W/2, H/2, game.visionRadius, angle - arcSpan/2, angle + arcSpan/2);
+      ctx.stroke();
+
+      // Small dot at arc center for orientation
       ctx.fillStyle = '#5ac8fa';
       ctx.beginPath();
-      ctx.moveTo(12, 0);
-      ctx.lineTo(-6, -8);
-      ctx.lineTo(-6, 8);
-      ctx.closePath();
+      ctx.arc(
+        W/2 + Math.cos(angle) * game.visionRadius,
+        H/2 + Math.sin(angle) * game.visionRadius,
+        3, 0, Math.PI * 2
+      );
       ctx.fill();
+
       ctx.restore();
     }
   }

@@ -45,7 +45,7 @@ canvas { display: block; }
 .hidden { display: none !important; }
 
 #hud {
-  position: fixed; top: 0; left: 0; right: 0;
+  position: fixed; top: 20px; left: 0; right: 0;
   display: flex; justify-content: space-between; align-items: center;
   padding: 12px 24px; z-index: 5; pointer-events: none;
 }
