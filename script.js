@@ -42,6 +42,11 @@ const wordSets = [
     { ru: 'приключение', en: 'adventure', emoji: '🗡️' }, { ru: 'знание', en: 'knowledge', emoji: '🧠' },
     { ru: 'солнечный', en: 'sunny', emoji: '🌤️' }, { ru: 'дождливый', en: 'rainy', emoji: '🌧️' },
     { ru: 'красивый', en: 'beautiful', emoji: '😍' }, { ru: 'быстрый', en: 'fast', emoji: '💨' },
+    { ru: 'жить', en: 'live', emoji: '🏡' }, { ru: 'знаменитый', en: 'famous', emoji: '🌟' },
+    { ru: 'необычный', en: 'unusual', emoji: '🦄' }, { ru: 'высокий', en: 'tall', emoji: '🦒' },
+    { ru: 'высоко наверху', en: 'high up', emoji: '🎈' }, { ru: 'собственный', en: 'own', emoji: '🔑' },
+    { ru: 'крыша', en: 'roof', emoji: '🛖' }, { ru: 'быть в форме', en: 'keep fit', emoji: '🏋️' },
+    { ru: 'цена', en: 'price', emoji: '🏷️' }, { ru: 'платить', en: 'pay', emoji: '💵' },
   ]
 ];
 
