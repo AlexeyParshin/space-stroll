@@ -9,73 +9,12 @@ function resize() {
 resize();
 window.addEventListener('resize', resize);
 
-// --- Word lists by difficulty ---
-const wordSets = [
-  [
-    { ru: 'кот', en: 'cat', emoji: '🐱' }, { ru: 'собака', en: 'dog', emoji: '🐶' },
-    { ru: 'дом', en: 'house', emoji: '🏠' }, { ru: 'дерево', en: 'tree', emoji: '🌳' },
-    { ru: 'вода', en: 'water', emoji: '💧' }, { ru: 'еда', en: 'food', emoji: '🍕' },
-    { ru: 'машина', en: 'car', emoji: '🚗' }, { ru: 'книга', en: 'book', emoji: '📖' },
-    { ru: 'солнце', en: 'sun', emoji: '☀️' }, { ru: 'луна', en: 'moon', emoji: '🌙' },
-    { ru: 'звезда', en: 'star', emoji: '⭐' }, { ru: 'ребенок', en: 'child', emoji: '👶' },
-    { ru: 'игра', en: 'game', emoji: '🎮' }, { ru: 'шар', en: 'ball', emoji: '⚽' },
-    { ru: 'цветок', en: 'flower', emoji: '🌸' }, { ru: 'птица', en: 'bird', emoji: '🐦' },
-    { ru: 'банан', en: 'banana', emoji: '🍌' }, { ru: 'печенье', en: 'biscuit', emoji: '🍪' },
-    { ru: 'хлеб', en: 'bread', emoji: '🍞' }, { ru: 'сливочное масло', en: 'butter', emoji: '🧈' },
-    { ru: 'торт', en: 'cake', emoji: '🎂' }, { ru: 'сыр', en: 'cheese', emoji: '🧀' },
-    { ru: 'курица', en: 'chicken', emoji: '🍗' }, { ru: 'картофель фри', en: 'chips', emoji: '🍟' },
-    { ru: 'кофе', en: 'coffee', emoji: '☕' }, { ru: 'рыба', en: 'fish', emoji: '🐟' },
-    { ru: 'мука', en: 'flour', emoji: '🌾' }, { ru: 'мёд', en: 'honey', emoji: '🍯' },
-    { ru: 'мороженое', en: 'ice cream', emoji: '🍦' }, { ru: 'джем', en: 'jam', emoji: '🫙' },
-    { ru: 'лимонад', en: 'lemonade', emoji: '🍋' }, { ru: 'мясо', en: 'meat', emoji: '🥩' },
-    { ru: 'молоко', en: 'milk', emoji: '🥛' }, { ru: 'растительное масло', en: 'oil', emoji: '🫒' },
-    { ru: 'лук', en: 'onion', emoji: '🧅' }, { ru: 'апельсиновый сок', en: 'orange juice', emoji: '🧃' },
-    { ru: 'пицца', en: 'pizza', emoji: '🍕' }, { ru: 'салат', en: 'salad', emoji: '🥗' },
-    { ru: 'соль', en: 'salt', emoji: '🧂' }, { ru: 'смузи', en: 'smoothie', emoji: '🥤' },
-    { ru: 'клубника', en: 'strawberry', emoji: '🍓' }, { ru: 'сахар', en: 'sugar', emoji: '🍬' },
-    { ru: 'суши', en: 'sushi', emoji: '🍣' }, { ru: 'чай', en: 'tea', emoji: '🍵' },
-    { ru: 'помидор', en: 'tomato', emoji: '🍅' }, { ru: 'вегетарианский бургер', en: 'veggie burger', emoji: '🍔' },
-    { ru: 'йогурт', en: 'yoghurt', emoji: '🥣' },
-  ],
-  [
-    { ru: 'яблоко', en: 'apple', emoji: '🍎' }, { ru: 'стол', en: 'table', emoji: '🪵' },
-    { ru: 'стул', en: 'chair', emoji: '🪑' }, { ru: 'одежда', en: 'clothes', emoji: '👕' },
-    { ru: 'окно', en: 'window', emoji: '🪟' }, { ru: 'дверь', en: 'door', emoji: '🚪' },
-    { ru: 'город', en: 'city', emoji: '🏙️' }, { ru: 'школа', en: 'school', emoji: '🏫' },
-    { ru: 'друг', en: 'friend', emoji: '🤝' }, { ru: 'время', en: 'time', emoji: '⏰' },
-    { ru: 'работа', en: 'work', emoji: '💼' }, { ru: 'день', en: 'day', emoji: '🌞' },
-    { ru: 'ночь', en: 'night', emoji: '🌜' }, { ru: 'гора', en: 'mountain', emoji: '⛰️' },
-    { ru: 'река', en: 'river', emoji: '🏞️' }, { ru: 'море', en: 'sea', emoji: '🌊' },
-    { ru: 'земля', en: 'earth', emoji: '🌍' }, { ru: 'небо', en: 'sky', emoji: '🌌' },
-    { ru: 'ванная комната', en: 'bathroom', emoji: '🧼' }, { ru: 'спальня', en: 'bedroom', emoji: '😴' },
-    { ru: 'столовая', en: 'dining room', emoji: '🍽️' }, { ru: 'гараж', en: 'garage', emoji: '🚙' },
-    { ru: 'сад', en: 'garden', emoji: '🌷' }, { ru: 'прихожая', en: 'hall', emoji: '🧥' },
-    { ru: 'кухня', en: 'kitchen', emoji: '🍳' }, { ru: 'гостиная', en: 'living room', emoji: '📺' },
-    { ru: 'кабинет', en: 'study', emoji: '📝' }, { ru: 'кресло', en: 'armchair', emoji: '💺' },
-    { ru: 'ванна', en: 'bath', emoji: '🛁' }, { ru: 'кровать', en: 'bed', emoji: '🛏️' },
-    { ru: 'плита', en: 'cooker', emoji: '🔥' }, { ru: 'шкафчик', en: 'cupboard', emoji: '🗄️' },
-    { ru: 'холодильник', en: 'fridge', emoji: '🧊' }, { ru: 'батарея', en: 'radiator', emoji: '♨️' },
-    { ru: 'полка', en: 'shelf', emoji: '🗃️' }, { ru: 'душ', en: 'shower', emoji: '🚿' },
-    { ru: 'раковина', en: 'sink', emoji: '🚰' }, { ru: 'диван', en: 'sofa', emoji: '🛋️' },
-    { ru: 'туалет', en: 'toilet', emoji: '🚽' }, { ru: 'шкаф для одежды', en: 'wardrobe', emoji: '👔' },
-  ],
-  [
-    { ru: 'самолет', en: 'airplane', emoji: '✈️' }, { ru: 'библиотека', en: 'library', emoji: '📚' },
-    { ru: 'больница', en: 'hospital', emoji: '🏥' }, { ru: 'завод', en: 'factory', emoji: '🏭' },
-    { ru: 'путешествие', en: 'journey', emoji: '🗺️' }, { ru: 'животное', en: 'animal', emoji: '🐾' },
-    { ru: 'яйцо', en: 'egg', emoji: '🥚' }, { ru: 'ножницы', en: 'scissors', emoji: '✂️' },
-    { ru: 'телескоп', en: 'telescope', emoji: '🔭' }, { ru: 'музыка', en: 'music', emoji: '🎵' },
-    { ru: 'радуга', en: 'rainbow', emoji: '🌈' }, { ru: 'подарок', en: 'present', emoji: '🎁' },
-    { ru: 'приключение', en: 'adventure', emoji: '🗡️' }, { ru: 'знание', en: 'knowledge', emoji: '🧠' },
-    { ru: 'солнечный', en: 'sunny', emoji: '🌤️' }, { ru: 'дождливый', en: 'rainy', emoji: '🌧️' },
-    { ru: 'красивый', en: 'beautiful', emoji: '😍' }, { ru: 'быстрый', en: 'fast', emoji: '💨' },
-    { ru: 'жить', en: 'live', emoji: '🏡' }, { ru: 'знаменитый', en: 'famous', emoji: '🌟' },
-    { ru: 'необычный', en: 'unusual', emoji: '🦄' }, { ru: 'высокий', en: 'tall', emoji: '🦒' },
-    { ru: 'высоко наверху', en: 'high up', emoji: '🎈' }, { ru: 'собственный', en: 'own', emoji: '🔑' },
-    { ru: 'крыша', en: 'roof', emoji: '🛖' }, { ru: 'быть в форме', en: 'keep fit', emoji: '🏋️' },
-    { ru: 'цена', en: 'price', emoji: '🏷️' }, { ru: 'платить', en: 'pay', emoji: '💵' },
-  ]
-];
+// --- Word lists by difficulty (edited in admin.html, stored in words.json) ---
+let wordSets = [[], [], []];
+const wordsReady = fetch("words.json", { cache: "no-cache" })
+  .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+  .then(d => { wordSets = [d.level1, d.level2, d.level3]; })
+  .catch(e => alert("Could not load words.json: " + e.message));
 
 const powerups = [
   { text: '🔭 Vision +20%', effect: (g) => { g.visionRadius += 40; } },
@@ -732,7 +671,8 @@ function updateHealthBar() {
 let game = null;
 let animFrame;
 
-function startGame() {
+async function startGame() {
+  await wordsReady;
   document.getElementById('startScreen').classList.add('hidden');
   document.getElementById('victoryScreen').classList.add('hidden');
   document.getElementById('hud').classList.remove('hidden');

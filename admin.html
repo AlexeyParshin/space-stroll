@@ -125,6 +125,7 @@
   .status-msg { font-size: 10px; margin-top: 8px; padding: 6px 10px; border-radius: 4px; }
   .status-ok { color: #44ff88; }
   .status-err { color: #ff6b8a; }
+  .dirty-mark { font-size: 10px; color: #f0c040; }
 
   /* Emoji picker */
   .emoji-picker {
@@ -171,6 +172,8 @@
   <div class="top-bar">
     <h1>ADMIN PANEL</h1>
     <div style="display:flex;gap:10px;align-items:center;">
+      <span id="dirtyMark" class="dirty-mark hidden">● unsaved changes</span>
+      <button class="btn btn-success" id="saveBtn" onclick="saveToGitHub()">💾 Save to GitHub</button>
       <a href="index.html" class="back-link">← Back to Game</a>
       <button class="btn btn-danger" onclick="logout()">Logout</button>
     </div>
@@ -270,26 +273,33 @@
     </div>
 
     <div class="io-section" style="border-color:#f0c040;">
-      <h2 style="color:#f0c040;">GENERATE UPDATED SCRIPT.JS</h2>
-      <p style="font-size:10px;color:#7a8aaa;margin-bottom:10px;">Download a complete updated script.js with your changes applied.</p>
+      <h2 style="color:#f0c040;">SAVE TO GITHUB</h2>
+      <p style="font-size:10px;color:#7a8aaa;margin-bottom:10px;line-height:1.8;">
+        "Save to GitHub" commits words.json to the repo; the game updates about a minute later.<br>
+        Needs a GitHub fine-grained token with <b>Contents: Read and write</b> on the space-stroller repo only
+        (github.com → Settings → Developer settings → Fine-grained tokens). It is stored only in this browser.
+      </p>
       <div class="io-actions">
-        <button class="btn btn-success" onclick="generateScript()">Generate & Download script.js</button>
+        <input type="password" id="ghToken" placeholder="github_pat_..." autocomplete="off" style="flex:1;min-width:200px;">
+        <button class="btn btn-primary" onclick="storeToken()">Save token</button>
+        <button class="btn btn-danger" onclick="forgetToken()">Forget token</button>
       </div>
+      <div id="tokenStatus"></div>
+      <div id="saveStatus"></div>
     </div>
   </div>
 </div>
 
+<script src="github-save.js"></script>
 <script>
 // ===== DATA =====
-// Loaded from script.js (the game's source of truth) so the admin always shows the live word list.
+// Loaded from words.json (what the game reads); saved back to GitHub with the "Save to GitHub" button.
 let wordSets = [[], [], []];
-const wordsLoaded = fetch('script.js', { cache: 'no-cache' })
-  .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
-  .then(src => {
-    const m = src.match(/const wordSets = (\[[\s\S]*?\]);/);
-    if (!m) throw new Error('wordSets not found in script.js');
-    wordSets = new Function('return ' + m[1])();
-  });
+let savedSnapshot = '';
+const wordsJson = () => JSON.stringify({ level1: wordSets[0], level2: wordSets[1], level3: wordSets[2] }, null, 2) + '\n';
+const wordsLoaded = fetch('words.json', { cache: 'no-cache' })
+  .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+  .then(d => { wordSets = [d.level1, d.level2, d.level3]; savedSnapshot = wordsJson(); });
 
 const LEVEL_NAMES = ['Level 1 (Easy)', 'Level 2 (Medium)', 'Level 3 (Hard)'];
 const COMMON_EMOJIS = [
@@ -317,7 +327,7 @@ async function checkLogin() {
   const pw = document.getElementById('passwordInput').value;
   if (pw === 'asd123') {
     try { await wordsLoaded; }
-    catch (e) { return alert('Could not load words from script.js: ' + e.message); }
+    catch (e) { return alert('Could not load words.json: ' + e.message); }
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('adminScreen').classList.remove('hidden');
     renderWords();
@@ -542,29 +552,56 @@ function importAll() {
   }
 }
 
-// ===== GENERATE SCRIPT.JS =====
-function generateScript() {
-  const wordSetsStr = JSON.stringify(wordSets, null, 2);
+// ===== SAVE TO GITHUB =====
+function updateDirty() {
+  const dirty = savedSnapshot && wordsJson() !== savedSnapshot;
+  document.getElementById('dirtyMark').classList.toggle('hidden', !dirty);
+}
+setInterval(updateDirty, 500);
+window.addEventListener('beforeunload', e => {
+  if (savedSnapshot && wordsJson() !== savedSnapshot) { e.preventDefault(); e.returnValue = ''; }
+});
 
-  // Read the original script.js content and replace data sections
-  fetch('script.js')
-    .then(r => r.text())
-    .then(original => {
-      let updated = original;
+function showTokenStatus() {
+  const has = !!GitHubSave.getToken();
+  document.getElementById('tokenStatus').innerHTML = has
+    ? '<div class="status-msg status-ok">Token is set in this browser.</div>'
+    : '<div class="status-msg status-err">No token yet. Paste one above to enable saving.</div>';
+}
+function storeToken() {
+  const v = document.getElementById('ghToken').value.trim();
+  if (!v) return;
+  GitHubSave.setToken(v);
+  document.getElementById('ghToken').value = '';
+  showTokenStatus();
+}
+function forgetToken() { GitHubSave.setToken(''); showTokenStatus(); }
+showTokenStatus();
 
-      // Replace wordSets
-      const wordSetsMatch = original.match(/const wordSets = \[[\s\S]*?\];/);
-      if (wordSetsMatch) {
-        updated = updated.replace(wordSetsMatch[0], `const wordSets = ${wordSetsStr};`);
-      }
-
-      downloadFile('script.js', 'application/javascript', updated);
-    })
-    .catch(() => {
-      // Fallback: just tell user to manually update
-      alert('Could not fetch script.js. Please copy the data below and replace in script.js:\n\n' +
-        'wordSets:\n' + wordSetsStr);
-    });
+async function saveToGitHub() {
+  const status = document.getElementById('saveStatus');
+  const btn = document.getElementById('saveBtn');
+  if (!GitHubSave.getToken()) {
+    switchTab('export');
+    status.innerHTML = '<div class="status-msg status-err">Add a GitHub token first (below).</div>';
+    return;
+  }
+  const text = wordsJson();
+  if (text === savedSnapshot && !confirm('No changes since the last save. Save anyway?')) return;
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const total = wordSets.reduce((n, l) => n + l.length, 0);
+    const url = await GitHubSave.commitFile('words.json', text, `Admin: update words (${total} words)`);
+    savedSnapshot = text;
+    updateDirty();
+    status.innerHTML = `<div class="status-msg status-ok">Saved! <a href="${url}" target="_blank" style="color:#5ac8fa">View commit</a>. The game updates in about a minute.</div>`;
+    alert('Saved to GitHub. The game will update in about a minute.');
+  } catch (e) {
+    status.innerHTML = `<div class="status-msg status-err">Save failed: ${e.message}</div>`;
+    alert('Save failed: ' + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = '💾 Save to GitHub';
+  }
 }
 </script>
 </body>
