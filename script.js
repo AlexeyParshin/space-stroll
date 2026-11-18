@@ -101,9 +101,14 @@ let mouseDown = false;
 let mouseStartX = 0, mouseStartY = 0;
 let mouseX = 0, mouseY = 0;
 
+// Browsers fire emulated mouse events after a touch; ignore them so a tap isn't handled twice.
+let lastTouchTime = 0;
+const isEmulatedMouse = () => performance.now() - lastTouchTime < 800;
+
 window.addEventListener('mousedown', e => {
-  if (!game || game.transitioning) return;
+  if (!game || game.transitioning || isEmulatedMouse()) return;
   mouseDown = true;
+  pressStartTime = performance.now();
   mouseStartX = e.clientX;
   mouseStartY = e.clientY;
   mouseX = e.clientX;
@@ -116,13 +121,34 @@ window.addEventListener('mousemove', e => {
   mouseY = e.clientY;
 });
 
-window.addEventListener('mouseup', () => {
+// A short press without much movement is a tap → fire the grapple (same as SPACE).
+const TAP_MAX_MS = 300, TAP_MAX_MOVE = 15;
+let pressStartTime = 0;
+function isTap(x, y) {
+  return performance.now() - pressStartTime < TAP_MAX_MS &&
+    Math.hypot(x - mouseStartX, y - mouseStartY) < TAP_MAX_MOVE;
+}
+
+window.addEventListener('mouseup', e => {
+  if (isEmulatedMouse()) return;
+  if (mouseDown && isTap(e.clientX, e.clientY)) tryLaunchGrapple();
   mouseDown = false;
 });
 
+let steerTouchId = null;
+function findTouch(list, id) {
+  for (const t of list) if (t.identifier === id) return t;
+  return null;
+}
+
 window.addEventListener('touchstart', e => {
+  lastTouchTime = performance.now();
   if (!game || game.transitioning) return;
-  const t = e.touches[0];
+  // Extra finger while already steering → fire grapple
+  if (steerTouchId !== null) { tryLaunchGrapple(); return; }
+  const t = e.changedTouches[0];
+  steerTouchId = t.identifier;
+  pressStartTime = performance.now();
   mouseDown = true;
   mouseStartX = t.clientX;
   mouseStartY = t.clientY;
@@ -132,14 +158,22 @@ window.addEventListener('touchstart', e => {
 
 window.addEventListener('touchmove', e => {
   if (!mouseDown) return;
-  const t = e.touches[0];
+  const t = findTouch(e.touches, steerTouchId);
+  if (!t) return;
   mouseX = t.clientX;
   mouseY = t.clientY;
 }, { passive: true });
 
-window.addEventListener('touchend', () => {
+function endTouch(e) {
+  lastTouchTime = performance.now();
+  const t = findTouch(e.changedTouches, steerTouchId);
+  if (!t) return;
+  if (mouseDown && e.type === 'touchend' && isTap(t.clientX, t.clientY)) tryLaunchGrapple();
+  steerTouchId = null;
   mouseDown = false;
-});
+}
+window.addEventListener('touchend', endTouch);
+window.addEventListener('touchcancel', endTouch);
 
 window.addEventListener('keydown', e => {
   keys[e.key] = true;
