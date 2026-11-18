@@ -281,40 +281,15 @@
 
 <script>
 // ===== DATA =====
-let wordSets = [
-  [
-    { ru: 'кот', en: 'cat', emoji: '🐱' }, { ru: 'собака', en: 'dog', emoji: '🐶' },
-    { ru: 'дом', en: 'house', emoji: '🏠' }, { ru: 'дерево', en: 'tree', emoji: '🌳' },
-    { ru: 'вода', en: 'water', emoji: '💧' }, { ru: 'еда', en: 'food', emoji: '🍕' },
-    { ru: 'машина', en: 'car', emoji: '🚗' }, { ru: 'книга', en: 'book', emoji: '📖' },
-    { ru: 'солнце', en: 'sun', emoji: '☀️' }, { ru: 'луна', en: 'moon', emoji: '🌙' },
-    { ru: 'звезда', en: 'star', emoji: '⭐' }, { ru: 'ребенок', en: 'child', emoji: '👶' },
-    { ru: 'игра', en: 'game', emoji: '🎮' }, { ru: 'шар', en: 'ball', emoji: '⚽' },
-    { ru: 'цветок', en: 'flower', emoji: '🌸' }, { ru: 'птица', en: 'bird', emoji: '🐦' },
-  ],
-  [
-    { ru: 'яблоко', en: 'apple', emoji: '🍎' }, { ru: 'стол', en: 'table', emoji: '🪵' },
-    { ru: 'стул', en: 'chair', emoji: '🪑' }, { ru: 'одежда', en: 'clothes', emoji: '👕' },
-    { ru: 'окно', en: 'window', emoji: '🪟' }, { ru: 'дверь', en: 'door', emoji: '🚪' },
-    { ru: 'город', en: 'city', emoji: '🏙️' }, { ru: 'школа', en: 'school', emoji: '🏫' },
-    { ru: 'друг', en: 'friend', emoji: '🤝' }, { ru: 'время', en: 'time', emoji: '⏰' },
-    { ru: 'работа', en: 'work', emoji: '💼' }, { ru: 'день', en: 'day', emoji: '🌞' },
-    { ru: 'ночь', en: 'night', emoji: '🌜' }, { ru: 'гора', en: 'mountain', emoji: '⛰️' },
-    { ru: 'река', en: 'river', emoji: '🏞️' }, { ru: 'море', en: 'sea', emoji: '🌊' },
-    { ru: 'земля', en: 'earth', emoji: '🌍' }, { ru: 'небо', en: 'sky', emoji: '🌌' },
-  ],
-  [
-    { ru: 'самолет', en: 'airplane', emoji: '✈️' }, { ru: 'библиотека', en: 'library', emoji: '📚' },
-    { ru: 'больница', en: 'hospital', emoji: '🏥' }, { ru: 'завод', en: 'factory', emoji: '🏭' },
-    { ru: 'путешествие', en: 'journey', emoji: '🗺️' }, { ru: 'животное', en: 'animal', emoji: '🐾' },
-    { ru: 'яйцо', en: 'egg', emoji: '🥚' }, { ru: 'ножницы', en: 'scissors', emoji: '✂️' },
-    { ru: 'телескоп', en: 'telescope', emoji: '🔭' }, { ru: 'музыка', en: 'music', emoji: '🎵' },
-    { ru: 'радуга', en: 'rainbow', emoji: '🌈' }, { ru: 'подарок', en: 'present', emoji: '🎁' },
-    { ru: 'приключение', en: 'adventure', emoji: '🗡️' }, { ru: 'знание', en: 'knowledge', emoji: '🧠' },
-    { ru: 'солнечный', en: 'sunny', emoji: '🌤️' }, { ru: 'дождливый', en: 'rainy', emoji: '🌧️' },
-    { ru: 'красивый', en: 'beautiful', emoji: '😍' }, { ru: 'быстрый', en: 'fast', emoji: '💨' },
-  ]
-];
+// Loaded from script.js (the game's source of truth) so the admin always shows the live word list.
+let wordSets = [[], [], []];
+const wordsLoaded = fetch('script.js', { cache: 'no-cache' })
+  .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+  .then(src => {
+    const m = src.match(/const wordSets = (\[[\s\S]*?\]);/);
+    if (!m) throw new Error('wordSets not found in script.js');
+    wordSets = new Function('return ' + m[1])();
+  });
 
 const LEVEL_NAMES = ['Level 1 (Easy)', 'Level 2 (Medium)', 'Level 3 (Hard)'];
 const COMMON_EMOJIS = [
@@ -338,9 +313,11 @@ const COMMON_EMOJIS = [
 ];
 
 // ===== AUTH =====
-function checkLogin() {
+async function checkLogin() {
   const pw = document.getElementById('passwordInput').value;
   if (pw === 'asd123') {
+    try { await wordsLoaded; }
+    catch (e) { return alert('Could not load words from script.js: ' + e.message); }
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('adminScreen').classList.remove('hidden');
     renderWords();
