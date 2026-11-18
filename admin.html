@@ -99,28 +99,10 @@
   }
   .form-group input:focus, .form-group select:focus { border-color: #5ac8fa; }
 
-  /* Import/Export */
+  /* GitHub tab */
   .io-section { margin-bottom: 30px; padding: 20px; background: rgba(20,30,60,0.5); border-radius: 10px; border: 1px solid #3a4a6a; }
 
-  textarea {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 10px; width: 100%; min-height: 200px; padding: 12px;
-    background: #0a0a1a; border: 2px solid #3a4a6a; color: #9ab0d0;
-    resize: vertical; outline: none; margin-bottom: 10px;
-  }
-  textarea:focus { border-color: #5ac8fa; }
-
   .io-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-
-  .file-input-label {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 11px; padding: 10px 24px;
-    border: 2px solid #5ac8fa; color: #5ac8fa;
-    cursor: pointer; border-radius: 8px; transition: all 0.2s;
-    background: rgba(90,200,250,0.1);
-  }
-  .file-input-label:hover { background: rgba(90,200,250,0.2); }
-  .file-input-label input { display: none; }
 
   .status-msg { font-size: 10px; margin-top: 8px; padding: 6px 10px; border-radius: 4px; }
   .status-ok { color: #44ff88; }
@@ -182,7 +164,7 @@
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('words')">Words</button>
     <button class="tab-btn" onclick="switchTab('emojis')">Emoji Map</button>
-    <button class="tab-btn" onclick="switchTab('export')">Export / Import</button>
+    <button class="tab-btn" onclick="switchTab('github')">GitHub</button>
   </div>
 
   <!-- Words Tab -->
@@ -247,31 +229,7 @@
   </div>
 
   <!-- Export/Import Tab -->
-  <div id="tab-export" class="tab-content">
-    <div class="io-section">
-      <h2>EXPORT (WORDS + EMOJIS)</h2>
-      <p style="font-size:10px;color:#7a8aaa;margin-bottom:10px;">Download all word sets with emojis as combined JSON. Format: { "level1": [{ "ru": "...", "en": "...", "emoji": "..." }], ... }</p>
-      <textarea id="exportAll" readonly style="min-height:200px;"></textarea>
-      <div class="io-actions">
-        <button class="btn btn-primary" onclick="generateExportAll()">Generate</button>
-        <button class="btn btn-success" onclick="downloadFile('space-stroll-data.json', 'application/json', document.getElementById('exportAll').value)">Download JSON</button>
-      </div>
-    </div>
-
-    <div class="io-section">
-      <h2>IMPORT (WORDS + EMOJIS)</h2>
-      <p style="font-size:10px;color:#7a8aaa;margin-bottom:10px;">Replace all word sets and emojis with imported JSON. Accepts the same format as export.</p>
-      <textarea id="importAll" placeholder='{"level1":[{"ru":"кот","en":"cat","emoji":"🐱"}],...}'></textarea>
-      <div class="io-actions">
-        <label class="file-input-label">
-          Choose File
-          <input type="file" accept=".json" onchange="loadFile(event, 'importAll')">
-        </label>
-        <button class="btn btn-danger" onclick="importAll()">Import (Replace All)</button>
-      </div>
-      <div id="importStatus"></div>
-    </div>
-
+  <div id="tab-github" class="tab-content">
     <div class="io-section" style="border-color:#f0c040;">
       <h2 style="color:#f0c040;">SAVE TO GITHUB</h2>
       <p style="font-size:10px;color:#7a8aaa;margin-bottom:10px;line-height:1.8;">
@@ -332,7 +290,6 @@ async function checkLogin() {
     document.getElementById('adminScreen').classList.remove('hidden');
     renderWords();
     renderEmojiEditor();
-    generateExportAll();
   } else {
     document.getElementById('loginError').classList.remove('hidden');
   }
@@ -351,7 +308,7 @@ function logout() {
 // ===== TABS =====
 function switchTab(name) {
   document.querySelectorAll('.tab-btn').forEach((b, i) => {
-    b.classList.toggle('active', ['words','emojis','export'][i] === name);
+    b.classList.toggle('active', ['words','emojis','github'][i] === name);
   });
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
@@ -513,45 +470,6 @@ function renderEmojiList() {
   document.getElementById('emojiList').innerHTML = html;
 }
 
-// ===== EXPORT / IMPORT =====
-function generateExportAll() {
-  const data = { level1: wordSets[0], level2: wordSets[1], level3: wordSets[2] };
-  document.getElementById('exportAll').value = JSON.stringify(data, null, 2);
-}
-
-function downloadFile(filename, type, content) {
-  const blob = new Blob([content], { type });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = filename; a.click();
-  URL.revokeObjectURL(url);
-}
-
-function loadFile(event, targetId) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => { document.getElementById(targetId).value = e.target.result; };
-  reader.readAsText(file);
-}
-
-function importAll() {
-  const status = document.getElementById('importStatus');
-  try {
-    const data = JSON.parse(document.getElementById('importAll').value);
-    if (!data.level1 || !data.level2 || !data.level3) throw new Error('Missing levels (need level1, level2, level3)');
-    wordSets[0] = data.level1;
-    wordSets[1] = data.level2;
-    wordSets[2] = data.level3;
-    status.innerHTML = '<div class="status-msg status-ok">Imported successfully! (words + emojis combined)</div>';
-    renderWords();
-    renderEmojiEditor();
-    generateExportAll();
-  } catch (e) {
-    status.innerHTML = `<div class="status-msg status-err">Error: ${e.message}</div>`;
-  }
-}
-
 // ===== SAVE TO GITHUB =====
 function updateDirty() {
   const dirty = savedSnapshot && wordsJson() !== savedSnapshot;
@@ -582,7 +500,7 @@ async function saveToGitHub() {
   const status = document.getElementById('saveStatus');
   const btn = document.getElementById('saveBtn');
   if (!GitHubSave.getToken()) {
-    switchTab('export');
+    switchTab('github');
     status.innerHTML = '<div class="status-msg status-err">Add a GitHub token first (below).</div>';
     return;
   }
